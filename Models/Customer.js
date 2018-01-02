@@ -10,5 +10,8 @@ export default Customer = {
     },
     getId: (customer) => {
         return customer._ref._documentPath._parts[1]
+    },
+    getContainerId: (customer) => {
+        return customer?customer._data.container._documentPath._parts[1]:null
     }
 }

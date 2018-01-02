@@ -1,7 +1,8 @@
 import React, { Component } from 'react';
-import {View, TextInput, StyleSheet, Button} from 'react-native';
+import {View, TextInput, StyleSheet, Button, Picker} from 'react-native';
 import firebase from 'react-native-firebase'
 import AddResourceCard from "../../../Components/AddResourceCard/AddResourceCard";
+import Container from "../../../Models/Container";
 
 export default class AddCustomer extends Component {
     static navigationOptions = {
@@ -11,18 +12,26 @@ export default class AddCustomer extends Component {
     state = {
         companyName: '',
         phone: '',
-        email: ''
+        email: '',
+        containers: [],
+        selected: null
     };
 
     componentDidMount() {
         this.customers = firebase.firestore().collection('Customers');
+        this.containers = firebase.firestore().collection('Containers');
+        this.unsubscriber = this.containers.onSnapshot(res => {
+            this.setState({containers: res._docs, selected: Container.getId(res._docs[0])})
+        })
     }
 
     addCustomer = () => {
         this.customers.add({
+            timestamp: firebase.firestore.FieldValue.serverTimestamp(),
             name: this.state.companyName,
             phone: this.state.phone,
-            email: this.state.email
+            email: this.state.email,
+            container: this.state.containers.filter(container => Container.getId(container)===this.state.selectedContainer)[0]._ref
         });
         this.setState({
             companyName: '',
@@ -51,6 +60,19 @@ export default class AddCustomer extends Component {
                     value={this.state.email}
                     onChangeText={(text) => {this.setState({email: text})}}
                 />
+                <View style={{flexDirection: 'row'}}>
+                    <Picker
+                        style={{flex: 1}}
+                        selectedValue={this.state.selectedContainer}
+                        onValueChange={(itemValue) => {this.setState({selected: itemValue})}}
+                    >
+                        {
+                            this.state.containers.map(container => {
+                                return <Picker.Item key={Container.getId(container)} label={Container.getName(container)} value={Container.getId(container)}/>
+                            })
+                        }
+                    </Picker>
+                </View>
             </AddResourceCard>
         )
     }

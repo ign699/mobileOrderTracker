@@ -1,5 +1,8 @@
 import React, { Component } from 'react';
-import {View, StyleSheet, Text, TextInput, TouchableOpacity, FlatList, ScrollView, Modal, Picker} from 'react-native';
+import {
+    View, StyleSheet, Text, TextInput, TouchableOpacity, FlatList, ScrollView, Modal, Picker,
+    Button
+} from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome'
 import Customer from '../../../Models/Customer'
 import AddHover from "../../../Components/AddHover/AddHover";
@@ -32,12 +35,16 @@ export default class AddOrder extends Component {
         customer: null,
         entries: [],
         containers: [],
-        details: false
+        details: false,
+        selectedContainer: '',
+        selectedProduct: null,
+        quantity: '0'
     };
 
     onCustomerPress = (customer) => {
         this.setState({
-            customer
+            customer,
+            selectedContainer: Customer.getContainerId(customer)
         });
         const { navigation } = this.props;
         navigation.goBack(null);
@@ -46,15 +53,14 @@ export default class AddOrder extends Component {
     componentDidMount() {
         this.containers = firebase.firestore().collection('Containers');
         this.unsubscriber = this.containers.onSnapshot(res => {
-            this.setState({containers: res._docs})
+            this.setState({containers: res._docs, selectedContainer:Container.getId(res._docs[0])})
         })
     }
 
     onProductPress = (product) => {
         this.setState(prevState => {
-            prevState.entries.push({product: product, quantity: 0, container:{}});
             return {
-                entries: prevState.entries,
+                selectedProduct: product,
                 details: true
             }
         });
@@ -64,7 +70,7 @@ export default class AddOrder extends Component {
 
     renderEntry = ({ item }) => {
         return (
-            <OrderEntryCard name={Product.getName(item)}/>
+            <OrderEntryCard productName={Product.getName(item.product)} containerName={Container.getName(item.container)} quantity={item.quantity} />
         )
     };
 
@@ -78,9 +84,39 @@ export default class AddOrder extends Component {
       navigate("SelectCustomer", {title: "Select cus...", onPress: this.onCustomerPress})
     };
 
+    closeModal = () => {
+        this.setState(prevState => {
+            prevState.entries.pop();
+            return {
+                details: false,
+                entries: prevState.entries,
+                selectedContainer: Customer.getContainerId(this.state.customer)
+            }
+        })
+    };
+
+    addEntry = () => {
+        const entry = {
+            product: this.state.selectedProduct,
+            container: this.state.containers.filter(container => Container.getId(container) === this.state.selectedContainer)[0],
+            quantity: this.state.quantity
+        };
+        this.setState(prevState => {
+
+            prevState.entries.push(entry)
+            return {
+                quantity: '0',
+                selectedProduct: null,
+                selectedContainer: Customer.getContainerId(this.state.customer) || Container.getId(prevState.containers[0]),
+                entries: prevState.entries,
+                details: false
+            }
+        })
+    };
+
     render() {
         const { customer, containers } = this.state;
-        console.log(containers)
+        console.log(this.state.entries)
         return (
             <View style={styles.container}>
                 <ScrollView style={styles.card}>
@@ -111,7 +147,8 @@ export default class AddOrder extends Component {
                         numberOfLines={4}
                     />
                     <FlatList
-                        data={this.state.entries.map(entry => entry.product)}
+                        data={this.state.entries}
+                        extraData={this.state}
                         renderItem={this.renderEntry}
                     />
                 </ScrollView>
@@ -119,6 +156,7 @@ export default class AddOrder extends Component {
                 <Modal
                     visible={this.state.details}
                     transparent={true}
+                    onRequestClose={this.closeModal}
                 >
                     <View style={{flex: 1, justifyContent:'center', alignItems: 'center'}}>
                         <View style={{backgroundColor: "#FFF", alignSelf:'stretch', padding: 15, margin: 20, borderRadius: 5}}>
@@ -128,6 +166,8 @@ export default class AddOrder extends Component {
                                 </Text>
                                 <Picker
                                     style={{flex: 1}}
+                                    selectedValue={this.state.selectedContainer}
+                                    onValueChange={(itemValue) => {this.setState({selectedContainer: itemValue})}}
                                 >
                                     {
                                         this.state.containers.map(container => {
@@ -140,6 +180,16 @@ export default class AddOrder extends Component {
                                 <Text style={{fontSize:16, fontWeight: 'bold', color:'#000'}}>
                                     Quantity:
                                 </Text>
+                                <TouchableOpacity style={{flex: 1}}>
+                                    <TextInput
+                                        value={this.state.quantity}
+                                        onChangeText={(text) => {this.setState({quantity: text})}}
+                                        keyboardType={'numeric'}
+                                    />
+                                </TouchableOpacity>
+                            </View>
+                            <View style={{margin: 30}} >
+                                <Button title={"Add entry"} onPress={this.addEntry}/>
                             </View>
                         </View>
                     </View>

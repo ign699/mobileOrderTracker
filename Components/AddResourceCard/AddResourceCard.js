@@ -20,5 +20,5 @@ export default class AddResourceCard extends Component {
 
 AddResourceCard.propTypes = {
     title: PropTypes.string.isRequired,
-    onPress: PropTypes.string.isRequired
+    onPress: PropTypes.func.isRequired
 };
