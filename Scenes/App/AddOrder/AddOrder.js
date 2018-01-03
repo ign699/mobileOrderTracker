@@ -10,6 +10,7 @@ import OrderEntryCard from "./OrderEntryCard/OrderEntryCard";
 import Product from "../../../Models/Product";
 import firebase from 'react-native-firebase'
 import Container from '../../../Models/Container'
+import EntryDetailsModal from "./EntryDetailsModal/EntryDetailsModal";
 
 const styles = StyleSheet.create({
     container: {
@@ -22,7 +23,15 @@ const styles = StyleSheet.create({
         fontSize: 18,
         fontWeight: 'bold',
         color: '#000'
-    }
+    },
+    noteInput: {
+        borderColor: '#000',
+        borderWidth: 1,
+        borderRadius: 3,
+        marginTop: 10,
+        marginBottom: 10
+    },
+
 });
 
 
@@ -35,10 +44,8 @@ export default class AddOrder extends Component {
         customer: null,
         entries: [],
         containers: [],
-        details: false,
-        selectedContainer: '',
+        showEntryDetails: false,
         selectedProduct: null,
-        quantity: '0'
     };
 
     onCustomerPress = (customer) => {
@@ -53,7 +60,7 @@ export default class AddOrder extends Component {
     componentDidMount() {
         this.containers = firebase.firestore().collection('Containers');
         this.unsubscriber = this.containers.onSnapshot(res => {
-            this.setState({containers: res._docs, selectedContainer:Container.getId(res._docs[0])})
+            this.setState({containers: res._docs})
         })
     }
 
@@ -61,7 +68,7 @@ export default class AddOrder extends Component {
         this.setState(prevState => {
             return {
                 selectedProduct: product,
-                details: true
+                showEntryDetails: true
             }
         });
         const { navigation } = this.props;
@@ -88,19 +95,19 @@ export default class AddOrder extends Component {
         this.setState(prevState => {
             prevState.entries.pop();
             return {
-                details: false,
                 entries: prevState.entries,
-                selectedContainer: Customer.getContainerId(this.state.customer)
+                showEntryDetails: false
             }
         })
     };
 
-    addEntry = () => {
+    addEntry = (containerId, quantity) => {
         const entry = {
             product: this.state.selectedProduct,
-            container: this.state.containers.filter(container => Container.getId(container) === this.state.selectedContainer)[0],
-            quantity: this.state.quantity
+            container: this.state.containers.filter(container => Container.getId(container) === containerId)[0],
+            quantity: quantity
         };
+        console.log(entry)
         this.setState(prevState => {
 
             prevState.entries.push(entry)
@@ -109,14 +116,14 @@ export default class AddOrder extends Component {
                 selectedProduct: null,
                 selectedContainer: Customer.getContainerId(this.state.customer) || Container.getId(prevState.containers[0]),
                 entries: prevState.entries,
-                details: false
+                showEntryDetails: false
             }
         })
     };
 
     render() {
-        const { customer, containers } = this.state;
-        console.log(this.state.entries)
+        const { customer, containers } = this.state
+        console.log(Container.getId(containers[0]))
         return (
             <View style={styles.container}>
                 <ScrollView style={styles.card}>
@@ -136,13 +143,7 @@ export default class AddOrder extends Component {
                         Notes:
                     </Text>
                     <TextInput
-                        style={{
-                            borderColor: '#000',
-                            borderWidth: 1,
-                            borderRadius: 3,
-                            marginTop: 10,
-                            marginBottom: 10
-                        }}
+                        style={styles.noteInput}
                         multiline={true}
                         numberOfLines={4}
                     />
@@ -152,48 +153,13 @@ export default class AddOrder extends Component {
                         renderItem={this.renderEntry}
                     />
                 </ScrollView>
+                <EntryDetailsModal
+                    containers={this.state.containers}
+                    containerId={Customer.getContainerId(this.state.customer) || Container.getId(containers[0])}
+                    showModal={this.state.showEntryDetails}
+                    addEntry={this.addEntry}
+                />
                 <AddHover onPress={this.navigateProducts}/>
-                <Modal
-                    visible={this.state.details}
-                    transparent={true}
-                    onRequestClose={this.closeModal}
-                >
-                    <View style={{flex: 1, justifyContent:'center', alignItems: 'center'}}>
-                        <View style={{backgroundColor: "#FFF", alignSelf:'stretch', padding: 15, margin: 20, borderRadius: 5}}>
-                            <View style={{ flexDirection:'row', alignItems:'center'}}>
-                                <Text style={{fontSize:16, fontWeight: 'bold', color:'#000'}}>
-                                    Container:
-                                </Text>
-                                <Picker
-                                    style={{flex: 1}}
-                                    selectedValue={this.state.selectedContainer}
-                                    onValueChange={(itemValue) => {this.setState({selectedContainer: itemValue})}}
-                                >
-                                    {
-                                        this.state.containers.map(container => {
-                                            return <Picker.Item label={Container.getName(container)} value={Container.getId(container)}/>
-                                        })
-                                    }
-                                </Picker>
-                            </View>
-                            <View style={{ flexDirection:'row', alignItems:'center'}}>
-                                <Text style={{fontSize:16, fontWeight: 'bold', color:'#000'}}>
-                                    Quantity:
-                                </Text>
-                                <TouchableOpacity style={{flex: 1}}>
-                                    <TextInput
-                                        value={this.state.quantity}
-                                        onChangeText={(text) => {this.setState({quantity: text})}}
-                                        keyboardType={'numeric'}
-                                    />
-                                </TouchableOpacity>
-                            </View>
-                            <View style={{margin: 30}} >
-                                <Button title={"Add entry"} onPress={this.addEntry}/>
-                            </View>
-                        </View>
-                    </View>
-                </Modal>
             </View>
         )
     }

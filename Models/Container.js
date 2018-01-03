@@ -3,6 +3,6 @@ export default Container = {
         return container._data.name;
     },
     getId: (container) => {
-        return container._ref._documentPath._parts[1]
+        return container?container._ref._documentPath._parts[1]:null
     }
 }
