@@ -18,17 +18,6 @@ export default class Customers extends Component {
         left: 0
     };
 
-    componentDidMount() {
-        this.customers = firebase.firestore().collection('Customers');
-        this.unsubscriber = this.customers.onSnapshot(res => {
-            this.setState({customers: res._docs})
-        })
-    }
-
-    componentWillUnmount() {
-        this.unsubscriber();
-    }
-
     filteredList = (query) => {
         return this.state.customers.filter(customer => {
             return Customer.getName(customer).toLocaleLowerCase().includes(query.toLocaleLowerCase())

@@ -2,9 +2,9 @@ import React, { Component } from 'react';
 import BasicResourceScreen from '../../../Components/BasicResourceScreen/BasicResourceScreen'
 import Customer from '../../../Models/Customer'
 import firebase from 'react-native-firebase'
-//import CustomerCard from "./CustomerCard/CustomerCard";
+import { connect } from 'react-redux'
 
-export default class Customers extends Component {
+class Orders extends Component {
 
     state = {
         orders: []
@@ -41,8 +41,18 @@ export default class Customers extends Component {
     };
 
     render() {
+        console.log('props:', this.props.list )
         return (
             <BasicResourceScreen data={this.filteredList} renderItem={this.renderItem} addOnPress={this.navigate}/>
         )
     }
 }
+
+
+const mapStateToProps = (list) => {
+    return {
+        list: list
+    }
+};
+
+export default connect(mapStateToProps)(Orders)

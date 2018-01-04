@@ -39,17 +39,8 @@ export default class Login extends Component {
             })
     };
 
-    componentDidMount() {
-        firebase.auth().onAuthStateChanged((user) => {
-            if(user!==null){
-                const { navigate } = this.props.navigation;
-                navigate('App');
-            }
-        });
-    }
 
     render() {
-        console.log(this.state.user)
         return (
             <ScrollView contentContainerStyle={styles.container}>
                 <Text style={styles.header}>
