@@ -61,10 +61,6 @@ export default class EntryDetailsModal extends Component {
         }
     };
 
-    getRef = (ref) => {
-        ref?ref.focus():null
-    };
-
     render() {
         const { showModal, containers, containerId, addEntry } = this.props;
         return (
@@ -97,10 +93,10 @@ export default class EntryDetailsModal extends Component {
                             </Text>
                             <View style={styles.picker}>
                                 <TextInput
-                                    ref={this.getRef}
                                     value={this.state.quantity}
                                     onChangeText={this._onChangeText}
                                     keyboardType={'numeric'}
+                                    autoFocus={true}
                                 />
                             </View>
                         </View>
