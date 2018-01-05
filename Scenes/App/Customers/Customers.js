@@ -43,7 +43,6 @@ export default class Customers extends Component {
     };
 
     render() {
-        console.log(this.state.customers);
         return (
             <BasicResourceScreen data={this.filteredList} renderItem={this.renderItem} addOnPress={this.navigate}/>
         )

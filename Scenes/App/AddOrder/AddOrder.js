@@ -123,7 +123,6 @@ export default class AddOrder extends Component {
 
     render() {
         const { customer, containers } = this.state
-        console.log(Container.getId(containers[0]))
         return (
             <View style={styles.container}>
                 <ScrollView style={styles.card}>
@@ -158,6 +157,7 @@ export default class AddOrder extends Component {
                     containerId={Customer.getContainerId(this.state.customer) || Container.getId(containers[0])}
                     showModal={this.state.showEntryDetails}
                     addEntry={this.addEntry}
+                    onRequestClose={() => {}}
                 />
                 <AddHover onPress={this.navigateProducts}/>
             </View>

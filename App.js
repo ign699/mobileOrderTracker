@@ -14,7 +14,7 @@ console.disableYellowBox = true;
 
 
 const reducers = combineReducers({customers, containers, user})
-const store = createStore(reducers, applyMiddleware(logger));
+const store = createStore(reducers, applyMiddleware());
 
 
 class AppReg extends Component {

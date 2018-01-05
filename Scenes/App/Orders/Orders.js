@@ -30,7 +30,7 @@ class Orders extends Component {
 
     navigate = () => {
         const { navigate } = this.props.navigation;
-        console.log('navigate')
+
         navigate('AddOrder');
     };
 
@@ -41,7 +41,6 @@ class Orders extends Component {
     };
 
     render() {
-        console.log('props:', this.props.list )
         return (
             <BasicResourceScreen data={this.filteredList} renderItem={this.renderItem} addOnPress={this.navigate}/>
         )

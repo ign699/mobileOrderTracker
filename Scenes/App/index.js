@@ -44,7 +44,7 @@ class App extends Component {
                         :
                             <Login />
                     :
-                        <SplashScreen />
+                         <SplashScreen />
 
                 }
             </View>
@@ -56,7 +56,7 @@ const mapStateToProps = ({ customers, containers, user }) => {
     return {
         customers: customers.list,
         containers: containers.list,
-        user
+        user: user.user
     }
 };
 

@@ -61,6 +61,9 @@ export default class EntryDetailsModal extends Component {
         }
     };
 
+    getRef = (ref) => {
+        ref?ref.focus():null
+    };
 
     render() {
         const { showModal, containers, containerId, addEntry } = this.props;
@@ -68,7 +71,7 @@ export default class EntryDetailsModal extends Component {
             <Modal
                 visible={showModal}
                 transparent={true}
-                onRequestClose={this.closeModal}
+                onRequestClose={this.props.onRequestClose}
             >
                 <View style={styles.container}>
                     <View style={styles.modalBody}>
@@ -83,7 +86,7 @@ export default class EntryDetailsModal extends Component {
                             >
                                 {
                                     containers.map(container => {
-                                        return <Picker.Item label={Container.getName(container)} value={Container.getId(container)}/>
+                                        return <Picker.Item key={Container.getId(container)} label={Container.getName(container)} value={Container.getId(container)}/>
                                     })
                                 }
                             </Picker>
@@ -92,13 +95,14 @@ export default class EntryDetailsModal extends Component {
                             <Text style={styles.label}>
                                 Quantity:
                             </Text>
-                            <TouchableOpacity style={styles.picker}>
+                            <View style={styles.picker}>
                                 <TextInput
+                                    ref={this.getRef}
                                     value={this.state.quantity}
                                     onChangeText={this._onChangeText}
                                     keyboardType={'numeric'}
                                 />
-                            </TouchableOpacity>
+                            </View>
                         </View>
                         <View style={styles.button} >
                             <Button title={"Add entry"} onPress={this._addEntry}/>
@@ -114,6 +118,6 @@ export default class EntryDetailsModal extends Component {
 EntryDetailsModal.propTypes = {
     showModal: PropTypes.bool.isRequired,
     containers: PropTypes.array.isRequired,
-    containerId: PropTypes.string.isRequired,
+    //containerId: PropTypes.string.isRequired,
     addEntry: PropTypes.func.isRequired,
 }
