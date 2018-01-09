@@ -100,8 +100,8 @@ export default class EntryDetailsModal extends Component {
                                 />
                             </View>
                         </View>
-                        <View style={styles.button} >
-                            <Button title={"Add entry"} onPress={this._addEntry}/>
+                        <View style={styles.button}>
+                            <Button title={"Add entry"} onPress={this._addEntry} disabled={this.state.quantity===''} />
                         </View>
                     </View>
                 </View>

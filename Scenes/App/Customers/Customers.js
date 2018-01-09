@@ -5,8 +5,10 @@ import firebase from 'react-native-firebase'
 import CustomerCard from "./CustomerCard/CustomerCard";
 import PropTypes from 'prop-types';
 import {View} from "react-native";
+import {connect} from "react-redux";
+import customers from "../../../reducers/customers/customers";
 
-export default class Customers extends Component {
+class Customers extends Component {
 
     static navigationOptions = ({ navigation }) => ({
         title: navigation.state.params?navigation.state.params.title:"Customers"
@@ -19,7 +21,7 @@ export default class Customers extends Component {
     };
 
     filteredList = (query) => {
-        return this.state.customers.filter(customer => {
+        return this.props.customers.filter(customer => {
             return Customer.getName(customer).toLocaleLowerCase().includes(query.toLocaleLowerCase())
         })
     };
@@ -52,3 +54,13 @@ export default class Customers extends Component {
 Customer.propTypes = {
     onPress: PropTypes.func
 };
+
+
+
+const mapStateToProps = ({customers}) => {
+    return {
+        customers: customers.list
+    }
+};
+
+export default connect(mapStateToProps)(Customers)

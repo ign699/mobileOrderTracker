@@ -46,6 +46,7 @@ export default class AddOrder extends Component {
         containers: [],
         showEntryDetails: false,
         selectedProduct: null,
+        note: ''
     };
 
     onCustomerPress = (customer) => {
@@ -58,7 +59,7 @@ export default class AddOrder extends Component {
     };
 
     componentDidMount() {
-        this.containers = firebase.firestore().collection('Containers');
+        this.containers = firebase.firestore().collection('Orders');
         this.unsubscriber = this.containers.onSnapshot(res => {
             this.setState({containers: res._docs})
         })
@@ -91,15 +92,6 @@ export default class AddOrder extends Component {
       navigate("SelectCustomer", {title: "Select cus...", onPress: this.onCustomerPress})
     };
 
-    closeModal = () => {
-        this.setState(prevState => {
-            prevState.entries.pop();
-            return {
-                entries: prevState.entries,
-                showEntryDetails: false
-            }
-        })
-    };
 
     addEntry = (containerId, quantity) => {
         const entry = {
@@ -120,6 +112,24 @@ export default class AddOrder extends Component {
             }
         })
     };
+
+    addOrder = () => {
+        const parsedEntries = this.state.entries.map(entry => {
+            return {
+                product: entry.product._ref,
+                container: entry.container._ref,
+                quantity: entry.quantity
+            }
+        });
+        const customer = this.state.customer._ref;
+        const note = this.state.note;
+        firebase.firestore().collection('Containers').add({
+            entries: parsedEntries,
+            customer: customer,
+            note: note
+        })
+    };
+
 
     render() {
         const { customer, containers } = this.state
@@ -145,12 +155,31 @@ export default class AddOrder extends Component {
                         style={styles.noteInput}
                         multiline={true}
                         numberOfLines={4}
+                        value={this.state.note}
+                        onTextChange={(text) => {this.setState({note: text})}}
                     />
                     <FlatList
                         data={this.state.entries}
                         extraData={this.state}
                         renderItem={this.renderEntry}
                     />
+                    <TouchableOpacity
+                        style={
+                            {
+                                width: 150,
+                                height: 70,
+                                borderRadius: 35,
+                                backgroundColor: '#0b5bdd',
+                                justifyContent:'center',
+                                alignItems:'center',
+                                alignSelf:'center'
+                            }
+                        }
+                        onPress={this.addOrder}>
+                        <Text style={{fontSize: 16}}>
+                            Place Order
+                        </Text>
+                    </TouchableOpacity>
                 </ScrollView>
                 <EntryDetailsModal
                     containers={this.state.containers}
@@ -159,6 +188,7 @@ export default class AddOrder extends Component {
                     addEntry={this.addEntry}
                     onRequestClose={() => {}}
                 />
+
                 <AddHover onPress={this.navigateProducts}/>
             </View>
         )
