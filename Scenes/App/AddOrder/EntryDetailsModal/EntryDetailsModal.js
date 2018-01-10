@@ -96,7 +96,7 @@ class EntryDetailsModal extends Component {
                                     value={this.state.quantity}
                                     onChangeText={this._onChangeText}
                                     keyboardType={'numeric'}
-                                    //autoFocus={true}
+                                    autoFocus={true}
                                 />
                             </View>
                         </View>

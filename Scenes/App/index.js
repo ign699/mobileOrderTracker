@@ -9,6 +9,7 @@ import { authenticateUser } from "../../reducers/user/actions";
 import { updateProducts } from "../../reducers/products/actions";
 import Login from '../Login/Login'
 import MainRouter from '../../router'
+import {updateOrders} from "../../reducers/orders/actions";
 
 class App extends Component {
 
@@ -22,6 +23,9 @@ class App extends Component {
         })
         this.products = firebase.firestore().collection('Products').onSnapshot(res => {
             this.props.updateProducts(res._docs)
+        })
+        this.orders = firebase.firestore().collection('Orders').onSnapshot(res => {
+            this.props.updateOrders(res._docs)
         })
         this.auth = firebase.auth().onAuthStateChanged((user) => {
             if(user!==null){
@@ -78,6 +82,9 @@ const mapDispatchToProps = (dispatch) => {
         },
         updateProducts: (products) => {
             dispatch(updateProducts(products))
+        },
+        updateOrders: (orders) => {
+            dispatch(updateOrders(orders))
         }
 
     }

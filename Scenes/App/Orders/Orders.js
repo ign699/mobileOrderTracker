@@ -3,6 +3,7 @@ import BasicResourceScreen from '../../../Components/BasicResourceScreen/BasicRe
 import Customer from '../../../Models/Customer'
 import firebase from 'react-native-firebase'
 import { connect } from 'react-redux'
+import OrderCard from "./OrderCard/OrderCard";
 
 class Orders extends Component {
 
@@ -36,7 +37,7 @@ class Orders extends Component {
 
     renderItem = ({ item }) => {
         return (
-            <View></View>
+           <OrderCard customer={"ad"} note={"Ad"}/>
         )
     };
 
@@ -48,10 +49,12 @@ class Orders extends Component {
 }
 
 
-const mapStateToProps = (list) => {
+const mapStateToProps = (({customers, containers, products}) => {
     return {
-        list: list
+        customers: customers.list,
+        containers: containers.list,
+        products: products.list
     }
-};
+});
 
 export default connect(mapStateToProps)(Orders)

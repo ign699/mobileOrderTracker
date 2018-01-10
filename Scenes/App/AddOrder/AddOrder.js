@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 import {
-    View, StyleSheet, Text, TextInput, TouchableOpacity, FlatList, ScrollView, Modal, Picker,
-    Button
+    View, StyleSheet, Text, TextInput, TouchableOpacity, FlatList, ScrollView, ToastAndroid
 } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome'
 import Customer from '../../../Models/Customer'
@@ -11,6 +10,7 @@ import Product from "../../../Models/Product";
 import firebase from 'react-native-firebase'
 import Container from '../../../Models/Container'
 import EntryDetailsModal from "./EntryDetailsModal/EntryDetailsModal";
+import {connect} from "react-redux";
 
 const styles = StyleSheet.create({
     container: {
@@ -34,8 +34,7 @@ const styles = StyleSheet.create({
 
 });
 
-
-export default class AddOrder extends Component {
+class AddOrder extends Component {
     static navigationOptions = {
         title: 'Add new order',
     };
@@ -43,7 +42,6 @@ export default class AddOrder extends Component {
     state = {
         customer: null,
         entries: [],
-        containers: [],
         showEntryDetails: false,
         selectedProduct: null,
         note: ''
@@ -58,12 +56,6 @@ export default class AddOrder extends Component {
         navigation.goBack(null);
     };
 
-    componentDidMount() {
-        this.containers = firebase.firestore().collection('Orders');
-        this.unsubscriber = this.containers.onSnapshot(res => {
-            this.setState({containers: res._docs})
-        })
-    }
 
     onProductPress = (product) => {
         this.setState({
@@ -93,17 +85,16 @@ export default class AddOrder extends Component {
     addEntry = (containerId, quantity) => {
         const entry = {
             product: this.state.selectedProduct,
-            container: this.state.containers.filter(container => Container.getId(container) === containerId)[0],
+            container: this.props.containers.filter(container => Container.getId(container) === containerId)[0],
             quantity: quantity
         };
-        console.log(entry)
         this.setState(prevState => {
 
             prevState.entries.push(entry)
             return {
                 quantity: '0',
                 selectedProduct: null,
-                selectedContainer: Customer.getContainerId(this.state.customer) || Container.getId(prevState.containers[0]),
+                selectedContainer: Customer.getContainerId(this.state.customer) || Container.getId(this.props.containers[0]),
                 entries: prevState.entries,
                 showEntryDetails: false
             }
@@ -120,16 +111,25 @@ export default class AddOrder extends Component {
         });
         const customer = this.state.customer._ref;
         const note = this.state.note;
-        firebase.firestore().collection('Containers').add({
+        firebase.firestore().collection('Orders').add({
             entries: parsedEntries,
             customer: customer,
             note: note
+        }).then(res => {
+            ToastAndroid.show('Order added successfully', ToastAndroid.SHORT);
+            this.setState({
+                customer: null,
+                entries: [],
+                showEntryDetails: false,
+                selectedProduct: null,
+                note: ''
+            })
         })
     };
 
 
     render() {
-        const { customer, containers } = this.state
+        const { customer, containers } = this.state;
         return (
             <View style={styles.container}>
                 <ScrollView style={styles.card}>
@@ -153,7 +153,7 @@ export default class AddOrder extends Component {
                         multiline={true}
                         numberOfLines={4}
                         value={this.state.note}
-                        onTextChange={(text) => {this.setState({note: text})}}
+                        onChangeText={(text) => {this.setState({note: text})}}
                     />
                     <FlatList
                         data={this.state.entries}
@@ -172,14 +172,16 @@ export default class AddOrder extends Component {
                                 alignSelf:'center'
                             }
                         }
-                        onPress={this.addOrder}>
-                        <Text style={{fontSize: 16}}>
+                        onPress={this.addOrder}
+                        disabled={!(this.state.customer&&this.state.entries.length>0)}
+                    >
+                        <Text style={{fontSize: 16, color: "#FFF"}}>
                             Place Order
                         </Text>
                     </TouchableOpacity>
                 </ScrollView>
                 <EntryDetailsModal
-                    containerId={Customer.getContainerId(this.state.customer) || Container.getId(containers[0])}
+                    containerId={Customer.getContainerId(this.state.customer) || Container.getId(this.props.containers[0])}
                     showModal={this.state.showEntryDetails}
                     addEntry={this.addEntry}
                     onRequestClose={() => {}}
@@ -190,3 +192,12 @@ export default class AddOrder extends Component {
         )
     }
 }
+
+
+const mapStateToProp = ({containers}) => {
+    return {
+        containers: containers.list
+    }
+};
+
+export default connect(mapStateToProp)(AddOrder)
