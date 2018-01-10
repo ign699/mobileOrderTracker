@@ -3,31 +3,17 @@ import BasicResourceScreen from '../../../Components/BasicResourceScreen/BasicRe
 import firebase from 'react-native-firebase'
 import ProductCard from "./ProductCard/ProductCard";
 import Product from "../../../Models/Product";
+import {connect} from "react-redux";
 
-export default class Customers extends Component {
+class Products extends Component {
 
 
     static navigationOptions = ({ navigation }) => ({
         title: navigation.state.params?navigation.state.params.title:"Products"
     });
 
-    state = {
-        products: []
-    };
-
-    componentDidMount() {
-        this.customers = firebase.firestore().collection('Products');
-        this.unsubscriber = this.customers.onSnapshot(res => {
-            this.setState({products: res._docs})
-        })
-    }
-
-    componentWillUnmount() {
-        this.unsubscriber();
-    }
-
     filteredList = (query) => {
-        return this.state.products.filter(product => {
+        return this.props.products.filter(product => {
             return Product.getName(product).toLocaleLowerCase().includes(query.toLocaleLowerCase())
         })
     };
@@ -57,3 +43,13 @@ export default class Customers extends Component {
         )
     }
 }
+
+
+const mapStateToProps = ({products}) => {
+    return {
+        products: products.list
+    }
+};
+
+
+export default connect(mapStateToProps)(Products)

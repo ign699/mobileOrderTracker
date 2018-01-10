@@ -3,8 +3,9 @@ import {View, TextInput, StyleSheet, Button, Picker} from 'react-native';
 import firebase from 'react-native-firebase'
 import AddResourceCard from "../../../Components/AddResourceCard/AddResourceCard";
 import Container from "../../../Models/Container";
+import {connect} from "react-redux";
 
-export default class AddCustomer extends Component {
+class AddCustomer extends Component {
     static navigationOptions = {
         title: 'Add new customer',
     };
@@ -20,9 +21,7 @@ export default class AddCustomer extends Component {
     componentDidMount() {
         this.customers = firebase.firestore().collection('Customers');
         this.containers = firebase.firestore().collection('Containers');
-        this.unsubscriber = this.containers.onSnapshot(res => {
-            this.setState({containers: res._docs, selected: Container.getId(res._docs[0])})
-        })
+        this.setState({selected: Container.getId(this.props.containers[0])})
     }
 
     addCustomer = () => {
@@ -31,7 +30,7 @@ export default class AddCustomer extends Component {
             name: this.state.companyName,
             phone: this.state.phone,
             email: this.state.email,
-            container: this.state.containers.filter(container => Container.getId(container)===this.state.selectedContainer)[0]._ref
+            container: this.props.containers.filter(container => Container.getId(container)===this.state.selected)[0]._ref
         });
         this.setState({
             companyName: '',
@@ -63,11 +62,11 @@ export default class AddCustomer extends Component {
                 <View style={{flexDirection: 'row'}}>
                     <Picker
                         style={{flex: 1}}
-                        selectedValue={this.state.selectedContainer}
+                        selectedValue={this.state.selected}
                         onValueChange={(itemValue) => {this.setState({selected: itemValue})}}
                     >
                         {
-                            this.state.containers.map(container => {
+                            this.props.containers.map(container => {
                                 return <Picker.Item key={Container.getId(container)} label={Container.getName(container)} value={Container.getId(container)}/>
                             })
                         }
@@ -77,3 +76,13 @@ export default class AddCustomer extends Component {
         )
     }
 }
+
+
+const mapStateToProps = ({containers}) => {
+    return {
+        containers: containers.list,
+    }
+};
+
+
+export default connect(mapStateToProps)(AddCustomer)

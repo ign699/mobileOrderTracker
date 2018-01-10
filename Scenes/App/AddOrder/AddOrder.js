@@ -66,11 +66,9 @@ export default class AddOrder extends Component {
     }
 
     onProductPress = (product) => {
-        this.setState(prevState => {
-            return {
+        this.setState({
                 selectedProduct: product,
                 showEntryDetails: true
-            }
         });
         const { navigation } = this.props;
         navigation.goBack(null);
@@ -91,7 +89,6 @@ export default class AddOrder extends Component {
       const { navigate } = this.props.navigation;
       navigate("SelectCustomer", {title: "Select cus...", onPress: this.onCustomerPress})
     };
-
 
     addEntry = (containerId, quantity) => {
         const entry = {
@@ -182,7 +179,6 @@ export default class AddOrder extends Component {
                     </TouchableOpacity>
                 </ScrollView>
                 <EntryDetailsModal
-                    containers={this.state.containers}
                     containerId={Customer.getContainerId(this.state.customer) || Container.getId(containers[0])}
                     showModal={this.state.showEntryDetails}
                     addEntry={this.addEntry}

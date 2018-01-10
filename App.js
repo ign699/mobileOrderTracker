@@ -9,11 +9,12 @@ import {createStore, applyMiddleware, combineReducers} from 'redux'
 import customers from './reducers/customers/customers'
 import containers  from './reducers/containers/reducers'
 import user from './reducers/user/reducer'
+import products from './reducers/products/reducers'
 import logger from 'redux-logger'
 console.disableYellowBox = true;
 
 
-const reducers = combineReducers({customers, containers, user})
+const reducers = combineReducers({customers, containers, user, products});
 const store = createStore(reducers, applyMiddleware(logger));
 
 

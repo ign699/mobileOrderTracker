@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import {View, StyleSheet, Modal, Text, Picker, TouchableOpacity, TextInput, Button} from 'react-native';
 import Container from "../../../../Models/Container";
 import PropTypes from 'prop-types'
+import {connect} from "react-redux";
 
 
 const styles = StyleSheet.create({
@@ -38,8 +39,7 @@ const styles = StyleSheet.create({
     }
 });
 
-
-export default class EntryDetailsModal extends Component {
+class EntryDetailsModal extends Component {
 
 
     state = {
@@ -96,7 +96,7 @@ export default class EntryDetailsModal extends Component {
                                     value={this.state.quantity}
                                     onChangeText={this._onChangeText}
                                     keyboardType={'numeric'}
-                                    autoFocus={true}
+                                    //autoFocus={true}
                                 />
                             </View>
                         </View>
@@ -116,4 +116,15 @@ EntryDetailsModal.propTypes = {
     containers: PropTypes.array.isRequired,
     //containerId: PropTypes.string.isRequired,
     addEntry: PropTypes.func.isRequired,
-}
+};
+
+
+
+const mapStateToProps = ({containers}) => {
+    return {
+        containers: containers.list
+    }
+};
+
+
+export default connect(mapStateToProps)(EntryDetailsModal)

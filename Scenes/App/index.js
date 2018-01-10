@@ -6,6 +6,7 @@ import firebase from "react-native-firebase";
 import { updateCustomers } from "../../reducers/customers/actions";
 import {updateContainers} from "../../reducers/containers/actions";
 import { authenticateUser } from "../../reducers/user/actions";
+import { updateProducts } from "../../reducers/products/actions";
 import Login from '../Login/Login'
 import MainRouter from '../../router'
 
@@ -18,6 +19,9 @@ class App extends Component {
         });
         this.containers = firebase.firestore().collection('Containers').onSnapshot(res => {
             this.props.updateContainers(res._docs)
+        })
+        this.products = firebase.firestore().collection('Products').onSnapshot(res => {
+            this.props.updateProducts(res._docs)
         })
         this.auth = firebase.auth().onAuthStateChanged((user) => {
             if(user!==null){
@@ -71,7 +75,11 @@ const mapDispatchToProps = (dispatch) => {
         },
         authenticateUser: (user) => {
             dispatch(authenticateUser(user))
+        },
+        updateProducts: (products) => {
+            dispatch(updateProducts(products))
         }
+
     }
 };
 
